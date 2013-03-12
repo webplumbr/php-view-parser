@@ -1,0 +1,24 @@
+body {
+  font-family: "Trebuchet MS",Georgia,Verdana,Geneva,sans-serif; 
+}
+
+p,div,ul,li,h1,h2,h3,h4,h5,h6 {
+  padding: 0;
+  margin: 0;
+}
+
+.clear {
+  clear: both;
+}
+
+td {
+  border-right: 1px #CCC solid;
+  border-bottom: 1px #CCC solid;
+}
+
+.code {
+  background-color: #000;
+  color: #FFF;
+  font-family: sans-serif;
+  padding: 10px;
+}
