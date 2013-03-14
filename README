@@ -1,2 +1,15 @@
 Yet another PHP view parser that is meant to be simple and cacheable. No more ugly PHP tags and logic within the view template.
 Let your frontend JavaScript/CSS developer breathe some fresh air!
+
+=== Requirements ===
+PHP 5.3.0 and above
+
+This view parser makes use of PHP namespaces.
+
+=== Getting Started ===
+Take a look at index.php file and associated HTML example templates. You can uncomment examples in index.php and see how the parser 
+works for iteration and included files.
+
+The view parser implements a Cache interface and is offered with Memcached driver. So, if you are testing the Cacheability, make 
+sure you have Memcached (libmemcached) library installed on your Server and set the server IP/name and port according to your settings.
+
