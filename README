@@ -10,6 +10,6 @@ This view parser makes use of PHP namespaces.
 Take a look at index.php file and associated HTML example templates. You can uncomment examples in index.php and see how the parser 
 works for iteration and included files.
 
-The view parser implements a Cache interface and is offered with Memcached driver. So, if you are testing the Cacheability, make 
+The view parser employs a Cache interface and is offered with Memcached driver. So, if you are testing the Cacheability, make 
 sure you have Memcached (libmemcached) library installed on your Server and set the server IP/name and port according to your settings.
 

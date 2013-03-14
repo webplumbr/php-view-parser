@@ -111,7 +111,7 @@ class Parser
   
   protected function prepareCacheManager()
   {
-    if (extension_loaded('memcache')) {
+    if (extension_loaded('memcached')) {
       $this->cacheManager = new \Cache\Memcache;
     } else {
       $this->cacheManager = null;
