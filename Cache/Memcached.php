@@ -1,7 +1,7 @@
 <?php
 namespace Cache;
 
-class Memcache implements \Cache\Manager
+class Memcached implements \Cache\Manager
 {
   protected $driver;
   

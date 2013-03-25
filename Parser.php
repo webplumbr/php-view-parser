@@ -112,7 +112,7 @@ class Parser
   protected function prepareCacheManager()
   {
     if (extension_loaded('memcached')) {
-      $this->cacheManager = new \Cache\Memcache;
+      $this->cacheManager = new \Cache\Memcached;
     } else {
       $this->cacheManager = null;
     }
@@ -281,6 +281,16 @@ class Parser
   public function render($section)
   {
     print $this->text($section);
+  }
+
+  public function resetParsedBlocks()
+  {
+    $this->parsedBlocks = array();
+  }
+
+  public function resetParsedBlock($node)
+  {
+    $this->parsedBlocks[$node] = array();
   }
   
 }
