@@ -2,7 +2,7 @@
 
 require 'Parser.php';
 require 'Cache/Manager.php';
-require 'Cache/Memcache.php';
+require 'Cache/Memcached.php';
 
 /* example 1 */
 $view = new \View\Parser('views/example1.html');
