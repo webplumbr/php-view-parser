@@ -1,4 +1,5 @@
-Yet another PHP view parser that is meant to be simple and cacheable. No more ugly PHP tags and logic within the view template.
+A PHP view parser that is meant to be simple, cacheable and adaptable to your MVC framework. 
+No more ugly PHP tags and logic within the view template.
 Let your frontend JavaScript/CSS developer breathe some fresh air!
 
 Requirement(s)
