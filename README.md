@@ -2,6 +2,11 @@ A PHP view parser that is meant to be simple, cacheable and adaptable to your MV
 No more ugly PHP tags and logic within the view template.
 Let your frontend JavaScript/CSS developer breathe some fresh air!
 
+Documentation
+-------------
+
+For an updated documentation visit the [Author~s site](http://www.webplumbr.com/lab/template-parser)
+
 Requirement(s)
 -------------
 PHP 5.3.0 or above
