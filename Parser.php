@@ -15,6 +15,7 @@ class Parser
   protected $blocks;
   protected $parsedBlocks;
   protected $cacheManager;
+  protected $isCached;
   
   protected $genericNodePattern = '/<!--\s+BEGIN\s*:\s*([a-zA-Z0-9_]+)\s*-->(.*?)<!--\s+END\s*:\s*\1\s*-->/s';
   protected $lookupNodePattern  = '/(<!--\s+BEGIN\s*:\s*LOOKUP_NODE\s*-->.*?<!--\s+END\s*:\s*LOOKUP_NODE\s*-->)/s';
@@ -26,14 +27,15 @@ class Parser
   
   protected $basePath = ''; /* set this to your project root folder with trailing directory separator */
   
-  public function __construct($file, $cacheKey=null)
+  public function __construct($file)
   {
     /* template file with path relative to project root */
     $this->file = $file;
-    $this->vars     = array();
+    $this->vars = array();
+    $this->isCached = false; //initialize as NOT cached
     $this->prepareCacheManager();
     
-    if (!$this->isCached($cacheKey)) {
+    if (!$this->isCached()) {
       $this->parseTemplate();
     }
   }
@@ -109,89 +111,6 @@ class Parser
     }
   }
   
-  protected function prepareCacheManager()
-  {
-    if (extension_loaded('memcached')) {
-      $this->cacheManager = new \Cache\Memcached;
-    } else {
-      $this->cacheManager = null;
-    }
-  }
-  
-  /*
-   * Tells if the template has been cached
-   */
-  public function isCached($key)
-  {
-    if (empty($key)) {
-      return false;
-    }
-    
-    if (!$this->cacheManager instanceof \Cache\Manager) {
-      return false;
-    }
-    
-    $cachedObj = $this->cacheManager->get($key);
-    
-    if (!empty($cachedObj)) {
-      $cachedObj = unserialize($cachedObj);
-    }
-    
-    if ($cachedObj instanceof \Cache\Manager) {
-      $this->assignCachedInstance($cachedObj);
-      return true;
-    }
-    
-    return false;
-  }
-  
-  /*
-   * Used as a chain method before calling render
-   * 
-   */
-  public function cache($key, $expiresTime)
-  {
-    if ($this->cacheManager instanceof \Cache\Manager) {
-      $this->cacheManager->set($key, serialize($this), $expiresTime);
-    }
-    
-    return $this;
-  }
-  
-  protected function assignCachedInstance(\View\Parser $cachedView)
-  {
-    $this->parent = $cachedView->getParentNode();
-    $this->blocks = $cachedView->getBlocks();
-    $this->parsedBlocks = $cachedView->getParsedBlocks();
-    $this->tree = $cachedView->getTree();
-    $this->vars = $cachedView->getTemplateVars();
-  }
-  
-  public function getParentNode()
-  {
-    return $this->parent;
-  }
-  
-  public function getBlocks()
-  {
-    return $this->blocks;
-  }
-  
-  public function getParsedBlocks()
-  {
-    return $this->parsedBlocks;
-  }
-  
-  public function getTree()
-  {
-    return $this->tree;
-  }
-  
-  public function getTemplateVars()
-  {
-    return $this->vars;
-  }
-  
   protected function getLastNode($section)
   {
     $nodes = explode('.', $section);
@@ -236,6 +155,11 @@ class Parser
    */
   public function parse($section)
   {
+    if ($this->isCached()) {
+      //skip parsing of section - if it is a cached copy
+      return;
+    }
+    
     $lastNode = $this->getLastNode($section);
     
     //fetch the section content (i.e. template section)
@@ -286,11 +210,102 @@ class Parser
   public function resetParsedBlocks()
   {
     $this->parsedBlocks = array();
+    //resetting parsed blocks invalidates cache
+    $this->invalidateCache();
   }
 
   public function resetParsedBlock($node)
   {
     $this->parsedBlocks[$node] = array();
+    //resetting a parsed block invalidates cache
+    $this->invalidateCache();
   }
   
+  /* cache related methods */
+  
+  protected function prepareCacheManager()
+  {
+    if (extension_loaded('memcached')) {
+      $this->cacheManager = new \Cache\Memcached;
+    } else {
+      $this->cacheManager = null;
+    }
+  }
+  
+  /*
+   * Tells if the template has been cached
+   */
+  public function isCached()
+  {
+    if ($this->isCached) {
+      return true;
+    }
+    
+    if (!$this->cacheManager instanceof \Cache\Manager) {
+      return false;
+    }
+    
+    $cachedValue = $this->cacheManager->get($this->getCacheKey());
+    
+    $this->unserialize($cachedValue);
+    
+    return $this->isCached;
+  }
+  
+  /*
+   * Used as a chain method before calling render
+   * 
+   */
+  public function cache($expiresTime)
+  {
+    if ($this->cacheManager instanceof \Cache\Manager) {
+      $this->cacheManager->set($this->getCacheKey(), $this->getSerializedValue(), $expiresTime);
+    }
+    
+    return $this;
+  }
+  
+  protected function getCacheKey()
+  {
+    return md5($this->file);
+  }
+  
+  protected function invalidateCache()
+  {
+    if ($this->cacheManager instanceof \Cache\Manager) {
+      $this->cacheManager->delete($this->getCacheKey());
+    }
+    $this->isCached = false;
+  }
+  
+  protected function getSerializedValue()
+  {
+    $data = array(
+      'parent'       => $this->parent,
+      'tree'         => $this->tree,
+      'vars'         => $this->vars,
+      'blocks'       => $this->blocks,
+      'parsedBlocks' => $this->parsedBlocks
+    );
+    return serialize($data);
+  }
+  
+  protected function unserialize($data)
+  {
+    if (empty($data)) {
+      return;
+    }
+    
+    $data = unserialize($data);
+    
+    if (count($data) && !empty($data)) {    
+      $this->parent = $data['parent'];
+      $this->tree   = $data['tree'];
+      $this->vars   = $data['vars'];
+      $this->blocks = $data['blocks'];
+      $this->parsedBlocks = $data['parsedBlocks'];
+      
+      $this->isCached = true;
+    }
+  }
 }

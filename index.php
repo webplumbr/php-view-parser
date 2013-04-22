@@ -5,6 +5,7 @@ require 'Cache/Manager.php';
 require 'Cache/Memcached.php';
 
 /* example 1 */
+
 $view = new \View\Parser('views/example1.html');
 
 //assignment of template variables
@@ -19,7 +20,8 @@ if ($userLoggedIn) {
 }
 
 $view->parse('page');
-$view->render('page');
+
+$view->cache(120)->render('page');
 
 /* example 2 */
 /*
