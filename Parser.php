@@ -189,6 +189,9 @@ class Parser
         }
         $pattern = str_replace('LOOKUP_NODE', $child, $this->lookupNodePattern);
         $content = preg_replace($pattern, $replacement, $content);
+        //once the child content has been parsed - reset it
+        //this prevents duplicates on subsequent parse within an iteration
+        $this->parsedBlocks[$child] = array();
       }
     }
     
