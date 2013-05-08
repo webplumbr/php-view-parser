@@ -213,15 +213,11 @@ class Parser
   public function resetParsedBlocks()
   {
     $this->parsedBlocks = array();
-    //resetting parsed blocks invalidates cache
-    $this->invalidateCache();
   }
 
   public function resetParsedBlock($node)
   {
     $this->parsedBlocks[$node] = array();
-    //resetting a parsed block invalidates cache
-    $this->invalidateCache();
   }
   
   /* cache related methods */
@@ -271,14 +267,6 @@ class Parser
   protected function getCacheKey()
   {
     return md5($this->file);
-  }
-  
-  protected function invalidateCache()
-  {
-    if ($this->cacheManager instanceof \Cache\Manager) {
-      $this->cacheManager->delete($this->getCacheKey());
-    }
-    $this->isCached = false;
   }
   
   protected function getSerializedValue()
